@@ -1,0 +1,21 @@
+services:
+  web:
+    build:
+      context: ./docker/php-apache
+    container_name: symfony_web
+    working_dir: /var/www/html
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: dev
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_GROUP: www-data
+
+  composer:
+    image: composer:2
+    working_dir: /var/www/html
+    volumes:
+      - ./app:/var/www/html
+    entrypoint: ["composer", "--ansi", "--no-interaction"]

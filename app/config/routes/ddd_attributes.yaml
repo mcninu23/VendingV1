@@ -1,0 +1,3 @@
+ddd_system_http:
+  resource: ../../src/System/Infrastructure/Http/
+  type: attribute
