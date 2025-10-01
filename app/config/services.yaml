@@ -18,3 +18,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\System\Infrastructure\Persistence\DoctrineCoinRepository:
+        autowire: true
+        autoconfigure: true
+    App\System\Infrastructure\Persistence\DoctrineItemRepository:
+        autowire: true
+        autoconfigure: true
+
+    App\System\Domain\Coin\CoinRepository: '@App\System\Infrastructure\Persistence\DoctrineCoinRepository'
+    App\System\Domain\Item\ItemRepository: '@App\System\Infrastructure\Persistence\DoctrineItemRepository'

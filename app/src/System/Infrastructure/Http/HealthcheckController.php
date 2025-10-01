@@ -4,7 +4,9 @@ namespace App\System\Infrastructure\Http;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 
+#[AsController]
 final class HealthcheckController
 {
     #[Route('/health', name: 'system_health', methods: ['GET'])]
