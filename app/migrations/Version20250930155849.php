@@ -20,10 +20,10 @@ final class Version20250930155849 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE coin (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(120) NOT NULL, value NUMERIC(4, 2) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE item (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(120) NOT NULL, value NUMERIC(4, 2) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('INSERT INTO coin (name, value) VALUES ("5 Cent", 0.05),("10 Cent", 0.10),("25 Cent", 0.25),("1 €", 1.00)');
-        $this->addSql('INSERT INTO item (name, value) VALUES ("Water", 0.65),("Juice", 1.00),("Soda", 1.50)');
+        $this->addSql('CREATE TABLE coin (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(120) NOT NULL, value NUMERIC(4, 2) NOT NULL, quantity INT DEFAULT 0 NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE item (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(120) NOT NULL, value NUMERIC(4, 2) NOT NULL, quantity INT DEFAULT 0 NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('INSERT INTO coin (name, value, quantity) VALUES ("5 Cent", 0.05, 50),("10 Cent", 0.10, 40),("25 Cent", 0.25, 40),("1 €", 1.00, 30)');
+        $this->addSql('INSERT INTO item (name, value, quantity) VALUES ("Water", 0.65, 30),("Juice", 1.00, 30),("Soda", 1.50, 30)');
     }
 
     public function down(Schema $schema): void

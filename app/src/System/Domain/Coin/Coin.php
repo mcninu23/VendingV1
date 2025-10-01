@@ -19,13 +19,18 @@ class Coin
     #[ORM\Column(type: 'decimal', precision: 4, scale: 2)]
     private string $value;
 
-    public function __construct(string $name, string $value)
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $quantity = 0;
+
+    public function __construct(string $name, string $value, int $quantity)
     {
         $this->name = $name;
         $this->value = $value;
+        $this->quantity = $quantity;
     }
 
     public function id(): ?int { return $this->id; }
     public function name(): string { return $this->name; }
     public function value(): string { return $this->value; }
+    public function quantity(): int { return $this->quantity; }
 }
