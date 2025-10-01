@@ -1,0 +1,25 @@
+doctrine:
+  dbal:
+    url: '%env(resolve:DATABASE_URL)%'
+    driver: 'pdo_mysql'
+
+  orm:
+    auto_generate_proxy_classes: true
+    enable_lazy_ghost_objects: true
+    auto_mapping: false
+    mappings:
+#        App:
+#            is_bundle: false
+#            type: attribute
+#            dir: '%kernel.project_dir%/src/Entity'
+#            prefix: 'App\Entity'
+        SystemDomain:
+            is_bundle: false
+            type: attribute
+            dir: '%kernel.project_dir%/src/System/Domain'
+            prefix: 'App\System\Domain'
+        SharedDomain:
+            is_bundle: false
+            type: attribute
+            dir: '%kernel.project_dir%/src/Shared/Domain'
+            prefix: 'App\Shared\Domain'

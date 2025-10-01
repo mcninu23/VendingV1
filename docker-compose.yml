@@ -12,6 +12,9 @@ services:
       APP_ENV: dev
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   composer:
     image: composer:2
@@ -19,3 +22,24 @@ services:
     volumes:
       - ./app:/var/www/html
     entrypoint: ["composer", "--ansi", "--no-interaction"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: symfony_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    ports:
+      - "3306:3306"   # opcional para acceder desde el host
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-psymfony"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:
