@@ -1,18 +1,19 @@
 <?php
 namespace App\System\Infrastructure\Persistence;
 
-use App\System\Domain\Coin\Coin;
-use App\System\Domain\Coin\CoinRepository;
+use App\System\Domain\Model\Coin\Coin;
+use App\System\Domain\Repository\Coin\CoinRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineCoinRepository implements CoinRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 
-    public function save(Coin $coin): void
+    public function save(Coin $coin, bool $flush = true): void
     {
         $this->em->persist($coin);
-        $this->em->flush();
+
+        if($flush) $this->em->flush();
     }
 
     public function byId(int $id): ?Coin

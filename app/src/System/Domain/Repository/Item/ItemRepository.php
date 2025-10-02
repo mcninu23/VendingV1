@@ -1,5 +1,7 @@
 <?php
-namespace App\System\Domain\Item;
+namespace App\System\Domain\Repository\Item;
+
+use App\System\Domain\Model\Item\Item;
 
 interface ItemRepository
 {

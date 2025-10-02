@@ -1,5 +1,7 @@
 <?php
-namespace App\System\Domain\Coin;
+namespace App\System\Domain\Repository\Coin;
+
+use App\System\Domain\Model\Coin\Coin;
 
 interface CoinRepository
 {

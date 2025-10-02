@@ -1,11 +1,11 @@
 <?php
-namespace App\System\Domain\Coin;
+namespace App\System\Domain\Model\Item;
 
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'coin')]
-class Coin
+#[ORM\Table(name: 'item')]
+class Item
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,4 +33,9 @@ class Coin
     public function name(): string { return $this->name; }
     public function value(): string { return $this->value; }
     public function quantity(): int { return $this->quantity; }
+    public function setQuantity(int $quantity): Item 
+    {
+        $this->quantity = $quantity;
+        return $this;
+    }
 }

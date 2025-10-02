@@ -1,8 +1,8 @@
 <?php
 namespace App\System\Infrastructure\Persistence;
 
-use App\System\Domain\Item\Item;
-use App\System\Domain\Item\ItemRepository;
+use App\System\Domain\Model\Item\Item;
+use App\System\Domain\Repository\Item\ItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineItemRepository implements ItemRepository
