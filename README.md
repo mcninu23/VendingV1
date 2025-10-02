@@ -60,14 +60,19 @@ docker compose run --rm composer dump-autoload
 docker compose run --rm composer install
 ```
 
-5. **Preparar base de datos**
+5. **Ejecutar la limpieza de cache**
+
+```bash
+docker compose run --rm composer install
+```
+
+6. **Preparar base de datos**
 
 ```bash
 docker compose exec web php bin/console doctrine:migrations:migrate -n
-# esto ya carga datos por defecto en las tablas
 ```
 
-6. **Comprobaciones rápidas**
+7. **Comprobaciones rápidas**
 
 - Salud de la app: `http://localhost:8080/health` → **OK**
 - Salud BD: `http://localhost:8080/db/health` → **DB OK**
