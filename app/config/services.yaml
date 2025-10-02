@@ -21,9 +21,14 @@ services:
     App\System\Infrastructure\Persistence\DoctrineCoinRepository:
         autowire: true
         autoconfigure: true
+    App\System\Domain\Repository\Coin\CoinRepository: '@App\System\Infrastructure\Persistence\DoctrineCoinRepository'
+
     App\System\Infrastructure\Persistence\DoctrineItemRepository:
         autowire: true
         autoconfigure: true
+    App\System\Domain\Repository\Item\ItemRepository: '@App\System\Infrastructure\Persistence\DoctrineItemRepository'
 
-    App\System\Domain\Coin\CoinRepository: '@App\System\Infrastructure\Persistence\DoctrineCoinRepository'
-    App\System\Domain\Item\ItemRepository: '@App\System\Infrastructure\Persistence\DoctrineItemRepository'
+    App\System\Infrastructure\Persistence\DoctrineSaleRepository:
+        autowire: true
+        autoconfigure: true
+    App\System\Domain\Repository\Sale\SaleRepository: '@App\System\Infrastructure\Persistence\DoctrineSaleRepository'
