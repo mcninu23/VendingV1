@@ -54,17 +54,17 @@ docker compose up -d --build
 docker compose run --rm composer dump-autoload
 ```
 
-4. **Preparar base de datos**
+4. **Instalar dependencias PHP** (dentro de Docker)
+
+```bash
+docker compose run --rm composer install
+```
+
+5. **Preparar base de datos**
 
 ```bash
 docker compose exec web php bin/console doctrine:migrations:migrate -n
 # esto ya carga datos por defecto en las tablas
-```
-
-5. **Instalar dependencias PHP** (dentro de Docker)
-
-```bash
-docker compose run --rm composer install
 ```
 
 6. **Comprobaciones rápidas**
