@@ -8,8 +8,8 @@ doctrine:
     enable_lazy_ghost_objects: true
     auto_mapping: false
     mappings:
-        SystemDomain:
-            is_bundle: false
-            type: attribute
-            dir: '%kernel.project_dir%/src/System/Domain'
-            prefix: 'App\System\Domain'
+      SystemDomain:
+        is_bundle: false
+        type: attribute
+        dir: '%kernel.project_dir%/src/System/Domain'
+        prefix: 'App\System\Domain'
