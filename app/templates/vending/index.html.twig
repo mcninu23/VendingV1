@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            <main style="max-width:900px;margin:2rem auto;font-family:system-ui;">
+            <h1 style="margin:0 0 1rem 0;">Vending</h1>
+
+            <section style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+                <!-- Balance -->
+                <div>
+                    <h2 style="margin:.25rem 0 .75rem 0;">Balance</h2>
+
+                    <div id="coins" style="display:flex;flex-wrap:wrap;gap:.5rem;">
+                        {% for coin in coins %}
+                        {# coin.value: "0.10", "0.20", ... → lo convertimos a céntimos para el JS #}
+                        {% set cents = (coin.value * 100)|round(0, 'common') %}
+                        <button
+                            type="button"
+                            class="coin"
+                            data-value="{{ coin.value }}"
+                            data-cents="{{ cents }}"
+                            style="padding:.6rem 1rem;border-radius:.5rem;border:1px solid #ccc;cursor:pointer;background:#fff;">
+                            €{{ coin.value }}
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <p style="margin-top:.5rem;">
+                        Inserted coins:
+                        <strong id="inserted" aria-live="polite" aria-atomic="true">€0.00</strong>
+                    </p>
+
+                    <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center;">
+                        <button id="returnMoney" type="button" style="padding:.5rem 1rem;border-radius:.5rem;border:1px solid #ccc;background:#fff;cursor:pointer;">
+                        Return coins
+                        </button>
+                        <span id="returnMessage" style="font-size:.95rem;color:#333;"></span>
+                    </div>
+                </div>
+
+
+                <!-- Items -->
+                <div>
+                    <h2 style="margin:.25rem 0 .75rem 0;">Items</h2>
+                    <div id="items" style="display:flex;flex-wrap:wrap;gap:.5rem;">
+                    {% for it in items %}
+                        <button
+                        type="button"
+                        class="item"
+                        data-id="{{ it.id }}"
+                        data-quantity="{{ it.quantity }}"
+                        data-price="{{ it.value }}"
+                        style="padding:.6rem 1rem;border-radius:.5rem;border:1px solid #ccc;cursor:pointer;background:#fff;">
+                        {{ it.name }} — €{{ it.value }}
+                        </button>
+                    {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- FORM -->
+            <div style="margin-top:1rem;display:flex;gap:.5rem;align-items:center;">
+                <button id="toggleServiceAdmin" type="button"
+                        style="padding:.5rem 1rem;border-radius:.5rem;border:1px solid #ccc;background:#fff;cursor:pointer;">
+                    Set service
+                </button>
+                </div>
+
+                <!-- Hidden admin panel -->
+                <section id="service-admin" hidden
+                        style="margin-top:1rem;padding:1rem;border:1px solid #999;border-radius:.5rem;background:#fafafa;">
+                <h3 style="margin:0 0 .75rem 0;">Admin panel</h3>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div>
+                    <h4>Coins</h4>
+                    <form id="service-admin-coins" class="grid" style="display:grid;gap:.5rem;"></form>
+                    </div>
+                    <div>
+                    <h4>Items</h4>
+                    <form id="service-admin-items" class="grid" style="display:grid;gap:.5rem;"></form>
+                    </div>
+                </div>
+
+                <div style="margin-top:1rem;display:flex;gap:.5rem;">
+                    <button id="service-admin-cancel" type="button"
+                            style="padding:.5rem 1rem;border-radius:.5rem;border:1px solid #ccc;background:#fff;cursor:pointer;">
+                    Cancel
+                    </button>
+                    <button id="service-admin-set" type="button"
+                            style="padding:.5rem 1rem;border-radius:.5rem;border:1px solid #0a7;background:#0a7;color:#fff;cursor:pointer;">
+                    SET
+                    </button>
+                    <span id="service-admin-msg" style="line-height:2;"></span>
+                </div>
+            </section>
+
+            <script>
+                //Helpers HTTP
+                async function getJSON(url){ 
+                    const r=await fetch(url); 
+                    const j=await r.json().catch(()=>({})); 
+                    if(!r.ok) throw new Error(j.message||`HTTP ${r.status}`); return j; 
+                }
+                async function postJSON(url, body){
+                    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+                    const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.message||`HTTP ${r.status}`); return j;
+                }
+
+                async function post(url, data) {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams(data)
+                });
+                if (!res.ok) {
+                    // try to extract JSON error, if not allow, throw generic
+                    try { const j = await res.json(); throw new Error(j.message || ('HTTP '+res.status)); }
+                    catch { throw new Error('HTTP '+res.status); }
+                }
+                return res.json();
+                }
+
+                async function get(url) {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP '+res.status);
+                return res.json();
+                }
+
+                // --- Elements ---
+                const toggleAdminBtn   = document.getElementById('toggleServiceAdmin');
+                const adminPanel       = document.getElementById('service-admin');
+                const coinsForm        = document.getElementById('service-admin-coins');
+                const itemsForm        = document.getElementById('service-admin-items');
+                const adminSetBtn      = document.getElementById('service-admin-set');
+                const adminCancelBtn   = document.getElementById('service-admin-cancel');
+                const adminMsg         = document.getElementById('service-admin-msg');
+
+                const serviceCoinsWrap = document.getElementById('service-coins');
+                const serviceItemsWrap = document.getElementById('service-items');
+
+                 // ---------- "Balance status" (only front) ----------
+                const coinsEl       = document.getElementById('coins');
+                const itemsEl       = document.getElementById('items');
+                const insertedEl    = document.getElementById('inserted');
+                const returnBtn     = document.getElementById('returnMoney');
+                const returnMessage = document.getElementById('returnMessage');
+
+                // total amount inserted in cents
+                let totalCents = 0;
+                let insertedCoins = []; // p.ej. [200, 50, 20]
+
+                const formatEUR = (c) => '€' + (c / 100).toFixed(2);
+
+                // ---------- Insert coin ----------
+                coinsEl?.addEventListener('click', (e) => {
+                const btn = e.target.closest('button.coin'); if (!btn) return;
+                const cents = parseInt(btn.dataset.cents || '0', 10);
+                if (!Number.isFinite(cents) || cents <= 0) return;
+
+                insertedCoins.push(cents);
+                totalCents += cents;
+
+                insertedEl.textContent = formatEUR(totalCents);
+                if (returnMessage) returnMessage.textContent = '';
+                });
+
+                // ---------- Return same coins ----------
+                returnBtn?.addEventListener('click', () => {
+                if (insertedCoins.length === 0) {
+                    if (returnMessage) returnMessage.textContent = 'No coins to return.';
+                    return;
+                }
+                const counts = insertedCoins.reduce((acc, c) => (acc[c] = (acc[c] || 0) + 1, acc), {});
+                const breakdown = Object.keys(counts).map(k => parseInt(k, 10)).sort((a,b)=>b-a)
+                    .map(c => `${(c/100).toFixed(2)}€ × ${counts[c]}`).join(', ');
+                if (returnMessage) returnMessage.textContent = 'Change: ' + breakdown;
+
+                insertedCoins = [];
+                totalCents = 0;
+                insertedEl.textContent = formatEUR(0);
+                });
+
+                // ---------- Items: buy ----------
+                itemsEl?.addEventListener('click', async (e) => {
+                const btn = e.target.closest('button.item'); if (!btn) return;
+
+                const id = btn.dataset.id;
+                const priceStr = btn.dataset.price || (btn.textContent.match(/€([\d.,]+)/)?.[1] ?? '');
+                const priceCents = Math.round(parseFloat(priceStr.replace(',', '.')) * 100);
+
+                // basic validations
+                if (!id) { alert('Item sin id'); return; }
+                if (!Number.isFinite(priceCents) || priceCents <= 0) { alert('Invalid price'); return; }
+
+                // check enough balance
+                if (totalCents < priceCents) {
+                    const faltan = priceCents - totalCents;
+                    alert(`Not enough balance. ${formatEUR(faltan)} are missing`);
+                    return;
+                }
+
+                // send to backend: id y list of excact coins inserted in cents
+                try {
+                    const payload = {
+                        id: id,                   
+                        inserted_cents: insertedCoins,
+                    };
+                    const json = await post('/api/items/purchase', payload);
+
+                    // update UI with resonse
+                    if (json.ok) {
+                        const current = parseInt(btn.getAttribute('data-quantity') || '0', 10);
+                        const next = Math.max(current - 1, 0);
+                        btn.setAttribute('data-quantity', String(next));
+                        const name = btn.textContent.split(' — ')[0];
+                        const shownPrice = (priceCents / 100).toFixed(2);
+                        btn.textContent = `${name} — €${shownPrice}`;
+
+                        // balance: reset to 0
+                        totalCents = 0;
+                        insertedCoins = [];
+                        insertedEl.textContent = formatEUR(0);
+                        
+
+                        if (json.change.length === 0) {
+                            text = '0€';
+                        } else {
+                            text = '';
+                        }
+                        json.change.forEach(({ value, quantity }) => {
+                            text += quantity+" x "+value+"€; ";
+                        });
+                        
+                        returnMessage.textContent =`Dispensed: ${json.itemName ?? name} / Change: ${text}`;
+                    } else {
+                        returnMessage.textContent = json.message || 'Purchase rejected'
+                    }
+                } catch (err) {
+                    // bussines or net errors
+                    alert(err.message || 'Error in purchase');
+                }
+                });
+
+                // Render helpers
+                function el(tag, attrs={}, text=''){
+                const n=document.createElement(tag);
+                Object.entries(attrs).forEach(([k,v])=> n.setAttribute(k,String(v)));
+                if(text) n.textContent=text;
+                return n;
+                }
+
+                // Load config and paint forms
+                async function loadServiceConfig(){
+                    adminMsg.textContent = 'Cargando...';
+                    const data = await getJSON('/api/service/config'); // {coins:[{id,name,value,quantity}], items:[{id,name,price,quantity}]}
+                    // Limpia
+                    coinsForm.innerHTML = ''; itemsForm.innerHTML = ''; adminMsg.textContent = '';
+
+                    // Coins
+                    data.coins.forEach(c=>{
+                        const row = el('label', {style:'display:flex;justify-content:space-between;gap:.5rem;align-items:center;'});
+                        row.appendChild(el('span', {}, `€${Number(c.value).toFixed(2)}`));
+                        const input = el('input', {
+                        type:'number', min:'0', step:'1', value:String(c.quantity ?? c.stock ?? 0),
+                        'data-id': String(c.id),
+                        'data-label': `€${Number(c.value).toFixed(2)}`
+                        });
+                        input.style.cssText='width:7rem;padding:.3rem .4rem;';
+                        row.appendChild(input);
+                        coinsForm.appendChild(row);
+                    });
+
+                    // Items
+                    data.items.forEach(i=>{
+                        const row = el('label', {style:'display:flex;justify-content:space-between;gap:.5rem;align-items:center;'});
+                        row.appendChild(el('span', {}, `${i.name}`));
+                        const input = el('input', {
+                        type:'number', min:'0', step:'1', value:String(i.quantity ?? i.stock ?? 0),
+                        'data-id': String(i.id),
+                        'data-label': i.name
+                        });
+                        input.style.cssText='width:7rem;padding:.3rem .4rem;';
+                        row.appendChild(input);
+                        itemsForm.appendChild(row);
+                    });
+
+                    // Collected
+                    const grid = itemsForm?.parentElement?.parentElement ?? adminPanel;
+
+                    // check if exists row "Total collected"?
+                    let totalRow = document.getElementById('service-total-row');
+                    let totalVal;
+
+                    // If exists only update the value
+                    if (totalRow) {
+                    totalVal = document.getElementById('service-total-collected');
+                    if (totalVal) {
+                        totalVal.textContent = `€${Number(data.totalCollected || 0).toFixed(2)}`;
+                    }
+                    } else {
+                        // If don't exists create it once
+                        totalRow = el('label', {
+                            id: 'service-total-row',
+                            style: 'display:flex;justify-content:space-between;gap:.5rem;align-items:center;margin-top:1rem;border-top:1px dashed #ccc;padding-top:.5rem;grid-column:1/-1;'
+                        });
+                        totalRow.appendChild(el('span', {}, 'Total collected'));
+                        totalVal = el('strong', { id: 'service-total-collected' }, `€${Number(data.totalCollected || 0).toFixed(2)}`);
+                        totalRow.appendChild(totalVal);
+                        grid.appendChild(totalRow);
+                    }
+                }
+
+                function setTotalCollected(val) {
+                    const n = document.getElementById('service-total-collected');
+                    if (n) n.textContent = `€${Number(val || 0).toFixed(2)}`;
+                }
+
+                // Toggle panel
+                toggleAdminBtn?.addEventListener('click', async ()=>{
+                const show = adminPanel.hasAttribute('hidden');
+                if(show){
+                    adminPanel.removeAttribute('hidden');
+                    try { await loadServiceConfig(); }
+                    catch(e){ adminMsg.textContent = e.message || 'Can\'t load configuration'; }
+                } else {
+                    adminPanel.setAttribute('hidden','');
+                    adminMsg.textContent = '';
+                }
+                });
+
+                adminCancelBtn?.addEventListener('click', ()=>{
+                adminPanel.setAttribute('hidden','');
+                adminMsg.textContent = '';
+                });
+
+                // Send SET
+                adminSetBtn?.addEventListener('click', async ()=>{
+                // Build payload
+                const coinsPayload = [...coinsForm.querySelectorAll('input[type="number"]')].map(inp=>({
+                    id: inp.getAttribute('data-id'),
+                    quantity: parseInt(inp.value||'0',10)
+                }));
+                const itemsPayload = [...itemsForm.querySelectorAll('input[type="number"]')].map(inp=>({
+                    id: inp.getAttribute('data-id'),
+                    quantity: parseInt(inp.value||'0',10)
+                }));
+
+                adminMsg.textContent = 'Saving...';
+                try{
+                    const res = await postJSON('/api/service/set', { coins: coinsPayload, items: itemsPayload });
+
+                    adminMsg.textContent = res.ok ? 'Saved' : (res.message || 'Error saving');
+                }catch(e){
+                    adminMsg.textContent = e.message || 'Fatal error saving';
+                }
+                });
+            </script>
+            </main>
+        {% endblock %}
+    </body>
+</html>
