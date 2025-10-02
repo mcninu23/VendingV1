@@ -65,7 +65,7 @@ docker compose run --rm composer install
 6. **Ejecutar la limpieza de cache**
 
 ```bash
-docker compose run --rm composer install
+docker compose exec web php bin/console cache:clear
 ```
 
 7. **Preparar base de datos**
