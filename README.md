@@ -98,8 +98,7 @@ docker compose exec web php bin/console doctrine:migrations:migrate -n
 │       ├── vhost.conf
 │       └── php.ini
 ├── .dockerignore
-├── docker-compose.yml
-└── Makefile                   
+└── docker-compose.yml                  
 ```
 
 - **Domain**: entidades, VOs, interfaces de repositorio.
