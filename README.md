@@ -37,42 +37,44 @@ Puertos por defecto:
 
 ```bash
 git clone https://github.com/mcninu23/VendingV1.git vendingv1
-cd vendingv1
+
 # Acceder a la carpeta donde has clonado el repositorio
 cd vendingv1
 ```
 
-2. **Levantar contenedores**
+2. **Abrir aplicacion Docker**
+
+3. **Levantar contenedores**
 
 ```env
 docker compose up -d --build
 ```
 
-3. **Generar archivos autoload**
+4. **Generar archivos autoload**
 
 ```bash
 docker compose run --rm composer dump-autoload
 ```
 
-4. **Instalar dependencias PHP** (dentro de Docker)
+5. **Instalar dependencias PHP** (dentro de Docker)
 
 ```bash
 docker compose run --rm composer install
 ```
 
-5. **Ejecutar la limpieza de cache**
+6. **Ejecutar la limpieza de cache**
 
 ```bash
 docker compose run --rm composer install
 ```
 
-6. **Preparar base de datos**
+7. **Preparar base de datos**
 
 ```bash
 docker compose exec web php bin/console doctrine:migrations:migrate -n
 ```
 
-7. **Comprobaciones rápidas**
+8. **Comprobaciones rápidas**
 
 - Salud de la app: `http://localhost:8080/health` → **OK**
 - Salud BD: `http://localhost:8080/db/health` → **DB OK**
