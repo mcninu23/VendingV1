@@ -344,6 +344,48 @@
                 adminMsg.textContent = '';
                 });
 
+                // --- clean form values ---
+                function clearServiceAdminForms() {
+                coinsForm?.querySelectorAll('input[type="number"]').forEach(i => { i.value = ''; });
+                itemsForm?.querySelectorAll('input[type="number"]').forEach(i => { i.value = ''; });
+                const totalEl = document.getElementById('service-total-collected');
+                if (totalEl) totalEl.textContent = '€0.00';
+                }
+
+                // --- hide admin panel if is visible ---
+                function hideServiceAdminPanel() {
+                if (!adminPanel) return;
+                if (!adminPanel.hasAttribute('hidden')) {
+                    adminPanel.setAttribute('hidden', '');
+                    clearServiceAdminForms();
+                    // limpia mensajes de estado si los tienes
+                    const adminMsg = document.getElementById('service-admin-msg');
+                    if (adminMsg) adminMsg.textContent = '';
+                }
+                }
+
+                // close panel if click outside 
+                document.addEventListener('click', (ev) => {
+                const target = ev.target;
+                if (!adminPanel) return;
+                if (adminPanel.hasAttribute('hidden')) return;
+
+                // ignore clicks inside the panel
+                const clickedInsidePanel = adminPanel.contains(target);
+                const clickedToggleBtn = toggleAdminBtn && (target === toggleAdminBtn || toggleAdminBtn.contains(target));
+                if (clickedInsidePanel || clickedToggleBtn) return;
+
+                // if outside click, clean an hide
+                hideServiceAdminPanel();
+                });
+
+                // close with esc button
+                document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape') hideServiceAdminPanel();
+                });
+
+                adminPanel?.addEventListener('click', (ev) => ev.stopPropagation());
+
                 // Send SET
                 adminSetBtn?.addEventListener('click', async ()=>{
                 // Build payload
