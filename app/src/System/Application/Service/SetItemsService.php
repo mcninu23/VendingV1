@@ -15,6 +15,13 @@ class SetItemsService
         $this->itemRepo = $itemRepo;
     }
 
+    /**
+     * Set quantity of items
+     * 
+     * @param array $itemValues array{id: int, quantity: int}
+     * @throws \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @return bool
+     */
     public function execute(array $itemValues): bool
     {
         //Check valid values

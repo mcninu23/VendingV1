@@ -15,6 +15,13 @@ class SetCoinsService
         $this->coinRepo = $coinRepo;
     }
 
+    /**
+     * Set quantity of coins
+     * 
+     * @param array $coinValues array{id: int, quantity: int}
+     * @throws \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @return bool
+     */
     public function execute(array $coinValues): bool
     {
         //Check valid values

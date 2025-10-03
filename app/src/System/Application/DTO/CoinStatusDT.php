@@ -1,10 +1,14 @@
 <?php
 namespace App\System\Application\DTO;
 
-use App\System\Domain\Model\Coin\Coin;
-
 class CoinStatusDT
 {
+    /**
+     * Transform Coin class to frontend format
+     * 
+     * @param array $coinsList array{\App\System\Domain\Model\Coin\Coin}
+     * @return array{id: int, name: string, value: string, quantity: int}
+     */
     public function transform(array $coinsList)
     {
         $availableCoins = [];

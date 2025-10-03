@@ -14,6 +14,11 @@ class GetTotalCollectedService
         $this->saleRepo = $saleRepo;
     }
 
+    /**
+     * Return total amount of sales
+     * 
+     * @return int
+     */
     public function execute(): int
     {
         $sales = $this->saleRepo->all();

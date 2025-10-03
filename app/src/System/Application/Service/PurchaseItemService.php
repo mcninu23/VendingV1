@@ -25,6 +25,16 @@ class PurchaseItemService
         $this->saleRepo = $saleRepo;
     }
 
+    /**
+     * Calculate change with Item and inserted coins
+     * 
+     * @param int $itemId
+     * @param array $insertedCents
+     * @throws \Symfony\Component\HttpKernel\Exception\ConflictHttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * Return coins to return an Item name
+     * @return array{coins: array{value: string, quantity: int}, itemName: string}
+     */
     public function execute(int $itemId, array $insertedCents): array
     {
         //Check item availability
