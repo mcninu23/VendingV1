@@ -5,7 +5,7 @@ use App\System\Domain\Model\Item\Item;
 use App\System\Domain\Repository\Item\ItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DoctrineItemRepository implements ItemRepository
+class DoctrineItemRepository implements ItemRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 

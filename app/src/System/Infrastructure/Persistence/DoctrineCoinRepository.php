@@ -5,7 +5,7 @@ use App\System\Domain\Model\Coin\Coin;
 use App\System\Domain\Repository\Coin\CoinRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DoctrineCoinRepository implements CoinRepository
+class DoctrineCoinRepository implements CoinRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 

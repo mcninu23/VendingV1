@@ -10,7 +10,7 @@ class Coin
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    protected ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 120)]
     private string $name;

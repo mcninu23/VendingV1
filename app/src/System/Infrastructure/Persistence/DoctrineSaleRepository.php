@@ -5,7 +5,7 @@ use App\System\Domain\Model\Sale\Sale;
 use App\System\Domain\Repository\Sale\SaleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DoctrineSaleRepository implements SaleRepository
+class DoctrineSaleRepository implements SaleRepository
 {
     public function __construct(private EntityManagerInterface $em) {}
 
