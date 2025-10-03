@@ -37,6 +37,8 @@ class PurchaseItemService
      */
     public function execute(int $itemId, array $insertedCents): array
     {
+        if (!is_int($itemId) || $itemId <= 0) throw new ConflictHttpException("Invalid item id");
+
         //Check item availability
         $item = $this->itemRepo->byId($itemId);
 
@@ -56,7 +58,11 @@ class PurchaseItemService
         //available coins for change
         $availableCoins = $this->coinRepo->all();
         $availableCoinsInCents = array_map(
-            fn($coin) => ['id' => $coin->id(), 'cents' => (int) ((float) $coin->value() * 100)], 
+            fn($coin) => [
+                'id' => $coin->id(), 
+                'cents' => (int) ((float) $coin->value() * 100),
+                'quantity' => $coin->quantity()
+            ], 
             $availableCoins
         );        
         rsort($availableCoinsInCents);
@@ -64,14 +70,21 @@ class PurchaseItemService
         //calculate change
         $coinsToReduceInDB = [];
         $remainingCents = $totalCentsToReturn;
-        $restOfCents = 0;
+        $restOfCents = $remainingCents;
 
         foreach ($availableCoinsInCents as $idAndCents) {
             if ($remainingCents <= 0) break;
             if ($remainingCents < $idAndCents['cents']) continue;
 
             $numberOfCoins = intdiv($remainingCents, $idAndCents['cents']);
-            $restOfCents = (int) $remainingCents % $idAndCents['cents'];
+            //Has necessary coins of this type?
+            if ($numberOfCoins > $idAndCents['quantity']) {
+                $numberOfCoins = $idAndCents['quantity'];
+                $centsToSubstract = $idAndCents['cents'] * $idAndCents['quantity'];              
+                $restOfCents -= $centsToSubstract;
+            } else {
+                $restOfCents = (int) $remainingCents % $idAndCents['cents'];
+            }
 
             if ($numberOfCoins > 0) {
                 $coinsToReduceInDB[$idAndCents['id']] = $numberOfCoins;
